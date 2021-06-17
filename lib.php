@@ -18,7 +18,7 @@
  * MercadoPago enrolment plugin
  *
  * @package    enrol_mercadopago
- * @copyright  2020 Hernan Arregoces
+ * @copyright  2020 Hernan Arregoces && 2021 Eduardo Kraus
  * @author     Hernan Arregoces harregoces@gmail.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 class enrol_mercadopago_plugin extends enrol_plugin {
 
     public function get_currencies() {
-        $codes = array('COP', 'ARS');
+        $codes = array('BRL', 'COP', 'ARS', 'CLP');
         $currencies = array();
         foreach ($codes as $c) {
             $currencies[$c] = new lang_string($c, 'core_currencies');
@@ -148,7 +148,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      * @throws dml_exception
      */
     function enrol_page_hook(stdClass $instance) {
-        global $CFG, $USER, $OUTPUT, $PAGE, $DB;
+        global $CFG, $USER, $OUTPUT, $DB;
         require_once($CFG->dirroot . "/enrol/mercadopago/vendor/autoload.php");
 
         ob_start();
@@ -169,16 +169,11 @@ class enrol_mercadopago_plugin extends enrol_plugin {
         $context = context_course::instance($course->id);
 
         $shortname = format_string($course->shortname, true, array('context' => $context));
-        $strloginto = get_string("loginto", "", $shortname);
-        $strcourses = get_string("courses");
 
         // Pass $view=true to filter hidden caps if the user cannot see them
         if ($users = get_users_by_capability($context, 'moodle/course:update', 'u.*', 'u.id ASC',
             '', '', '', '', false, true)) {
             $users = sort_by_roleassignment_authority($users, $context);
-            $teacher = array_shift($users);
-        } else {
-            $teacher = false;
         }
 
         if ((float)$instance->cost <= 0) {
@@ -201,17 +196,12 @@ class enrol_mercadopago_plugin extends enrol_plugin {
                 echo '<p><a href="' . $wwwroot . '/login/">' . get_string('loginsite') . '</a></p>';
                 echo '</div>';
             } else {
-                $public_key = $this->get_config('public_key');
 
                 $coursefullname = format_string($course->fullname, true, array('context' => $context));
-                $courseshortname = $shortname;
-                $userfullname = fullname($USER);
                 $userfirstname = $USER->firstname;
                 $userlastname = $USER->lastname;
 
                 $useremail = $USER->email;
-
-                $instancename = $this->get_instance_name($instance);
 
                 // Agrega credenciales
                 MercadoPago\SDK::setAccessToken($this->get_config('access_token'));
@@ -242,6 +232,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
                 $preference->payer = $payer;
                 $preference->save();
 
+                $instancename = $this->get_instance_name($instance);
                 include($CFG->dirroot . '/enrol/mercadopago/enrol.php');
             }
 
