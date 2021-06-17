@@ -209,11 +209,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
                 $userfirstname = $USER->firstname;
                 $userlastname = $USER->lastname;
 
-                if ($CFG->usemercadopagosandbox) {
-                    $useremail = $CFG->mercadopagosandbox_email;
-                } else {
-                    $useremail = $USER->email;
-                }
+                $useremail = $USER->email;
 
                 $instancename = $this->get_instance_name($instance);
 
