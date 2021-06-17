@@ -48,6 +48,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      *
      * @param array $instances all enrol instances of this type in one course
      * @return array of pix_icon
+     * @throws coding_exception
      */
     public function get_info_icons(array $instances) {
         $found = false;
@@ -88,6 +89,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      * Returns true if the user can add a new instance in this course.
      * @param int $courseid
      * @return boolean
+     * @throws coding_exception
      */
     public function can_add_instance($courseid) {
         $context = context_course::instance($courseid, MUST_EXIST);
@@ -114,6 +116,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      * @param object $course
      * @param array $fields instance fields
      * @return int id of new instance, null if can not be created
+     * @throws coding_exception
      */
     public function add_instance($course, array $fields = null) {
         if ($fields && !empty($fields['cost'])) {
@@ -141,14 +144,16 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      *
      * @param stdClass $instance
      * @return string html text, usually a form in a text box
+     * @throws coding_exception
+     * @throws dml_exception
      */
     function enrol_page_hook(stdClass $instance) {
         global $CFG, $USER, $OUTPUT, $PAGE, $DB;
-	    require_once($CFG->dirroot."/enrol/mercadopago/vendor/autoload.php");
+        require_once($CFG->dirroot . "/enrol/mercadopago/vendor/autoload.php");
 
         ob_start();
 
-        if ($DB->record_exists('user_enrolments', array('userid'=>$USER->id, 'enrolid'=>$instance->id))) {
+        if ($DB->record_exists('user_enrolments', array('userid' => $USER->id, 'enrolid' => $instance->id))) {
             return ob_get_clean();
         }
 
@@ -160,7 +165,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
             return ob_get_clean();
         }
 
-        $course = $DB->get_record('course', array('id'=>$instance->courseid));
+        $course = $DB->get_record('course', array('id' => $instance->courseid));
         $context = context_course::instance($course->id);
 
         $shortname = format_string($course->shortname, true, array('context' => $context));
@@ -169,21 +174,21 @@ class enrol_mercadopago_plugin extends enrol_plugin {
 
         // Pass $view=true to filter hidden caps if the user cannot see them
         if ($users = get_users_by_capability($context, 'moodle/course:update', 'u.*', 'u.id ASC',
-                                             '', '', '', '', false, true)) {
+            '', '', '', '', false, true)) {
             $users = sort_by_roleassignment_authority($users, $context);
             $teacher = array_shift($users);
         } else {
             $teacher = false;
         }
 
-        if ( (float) $instance->cost <= 0 ) {
-            $cost = (float) $this->get_config('cost');
+        if ((float)$instance->cost <= 0) {
+            $cost = (float)$this->get_config('cost');
         } else {
-            $cost = (float) $instance->cost;
+            $cost = (float)$instance->cost;
         }
 
         if (abs($cost) < 0.01) { // no cost, other enrolment methods (instances) should be used
-            echo '<p>'.get_string('nocost', 'enrol_mercadopago').'</p>';
+            echo '<p>' . get_string('nocost', 'enrol_mercadopago') . '</p>';
         } else {
 
             $localisedcost = format_float($cost, 2, true);
@@ -191,57 +196,57 @@ class enrol_mercadopago_plugin extends enrol_plugin {
 
             if (isguestuser()) { // force login only for guest user, not real users with guest role
                 $wwwroot = $CFG->wwwroot;
-                echo '<div class="mdl-align"><p>'.get_string('paymentrequired').'</p>';
-                echo '<p><b>'.get_string('cost').": $instance->currency $localisedcost".'</b></p>';
-                echo '<p><a href="'.$wwwroot.'/login/">'.get_string('loginsite').'</a></p>';
+                echo '<div class="mdl-align"><p>' . get_string('paymentrequired') . '</p>';
+                echo '<p><b>' . get_string('cost') . ": $instance->currency $localisedcost" . '</b></p>';
+                echo '<p><a href="' . $wwwroot . '/login/">' . get_string('loginsite') . '</a></p>';
                 echo '</div>';
             } else {
                 $public_key = $this->get_config('public_key');
 
-                $coursefullname  = format_string($course->fullname, true, array('context'=>$context));
+                $coursefullname = format_string($course->fullname, true, array('context' => $context));
                 $courseshortname = $shortname;
-                $userfullname    = fullname($USER);
-                $userfirstname   = $USER->firstname;
-                $userlastname    = $USER->lastname;
+                $userfullname = fullname($USER);
+                $userfirstname = $USER->firstname;
+                $userlastname = $USER->lastname;
 
-                if($CFG->usemercadopagosandbox) {
-	                $useremail       = $CFG->mercadopagosandbox_email;
+                if ($CFG->usemercadopagosandbox) {
+                    $useremail = $CFG->mercadopagosandbox_email;
                 } else {
-	                $useremail       = $USER->email;
+                    $useremail = $USER->email;
                 }
 
-                $instancename    = $this->get_instance_name($instance);
+                $instancename = $this->get_instance_name($instance);
 
-	            // Agrega credenciales
-	            MercadoPago\SDK::setAccessToken($this->get_config('access_token'));
-	            $preference = new MercadoPago\Preference();
+                // Agrega credenciales
+                MercadoPago\SDK::setAccessToken($this->get_config('access_token'));
+                $preference = new MercadoPago\Preference();
 
-	            $payer = new MercadoPago\Payer();
-	            $payer->name = $userfirstname;
-	            $payer->surname = $userlastname;
-	            $payer->email = $useremail;
+                $payer = new MercadoPago\Payer();
+                $payer->name = $userfirstname;
+                $payer->surname = $userlastname;
+                $payer->email = $useremail;
 
-				// Crea un ítem en la preferencia
-	            $item = new MercadoPago\Item();
-	            $item->id = $course->id;
-	            $item->title = $coursefullname;
-	            $item->description = $coursefullname;
-	            $item->quantity = 1;
-	            $item->currency_id = $instance->currency;
-	            $item->unit_price = (int) $cost;
-	            $preference->items = array($item);
-	            $url = $CFG->wwwroot."/enrol/mercadopago/ipn.php?instanceid=".$instance->id."&userid=".$USER->id."&courseid=".$course->id;
-	            $preference->back_urls = array(
-		            "success" => $url."&status=success",
-		            "failure" => $url."&status=failure",
-		            "pending" => $url."&status=pending"
-	            );
+                // Crea un ítem en la preferencia
+                $item = new MercadoPago\Item();
+                $item->id = $course->id;
+                $item->title = $coursefullname;
+                $item->description = $coursefullname;
+                $item->quantity = 1;
+                $item->currency_id = $instance->currency;
+                $item->unit_price = (int)$cost;
+                $preference->items = array($item);
+                $url = $CFG->wwwroot . "/enrol/mercadopago/ipn.php?instanceid=" . $instance->id . "&userid=" . $USER->id . "&courseid=" . $course->id;
+                $preference->back_urls = array(
+                    "success" => $url . "&status=success",
+                    "failure" => $url . "&status=failure",
+                    "pending" => $url . "&status=pending"
+                );
                 $preference->auto_return = "approved";
-			    $preference->external_reference =  $course->id."-".$USER->id."-".$instance->id;
-	            $preference->payer = $payer;
-	            $preference->save();
+                $preference->external_reference = $course->id . "-" . $USER->id . "-" . $instance->id;
+                $preference->payer = $payer;
+                $preference->save();
 
-                include($CFG->dirroot.'/enrol/mercadopago/enrol.html');
+                include($CFG->dirroot . '/enrol/mercadopago/enrol.php');
             }
 
         }
@@ -256,6 +261,8 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      * @param stdClass $data
      * @param stdClass $course
      * @param int $oldid
+     * @throws coding_exception
+     * @throws dml_exception
      */
     public function restore_instance(restore_enrolments_structure_step $step, stdClass $data, $course, $oldid) {
         global $DB;
@@ -263,11 +270,11 @@ class enrol_mercadopago_plugin extends enrol_plugin {
             $merge = false;
         } else {
             $merge = array(
-                'courseid'   => $data->courseid,
-                'enrol'      => $this->get_name(),
-                'roleid'     => $data->roleid,
-                'cost'       => $data->cost,
-                'currency'   => $data->currency,
+                'courseid' => $data->courseid,
+                'enrol' => $this->get_name(),
+                'roleid' => $data->roleid,
+                'cost' => $data->cost,
+                'currency' => $data->currency,
             );
         }
         if ($merge and $instances = $DB->get_records('enrol', $merge, 'id')) {
@@ -285,8 +292,9 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      * @param restore_enrolments_structure_step $step
      * @param stdClass $data
      * @param stdClass $instance
-     * @param int $oldinstancestatus
      * @param int $userid
+     * @param int $oldinstancestatus
+     * @throws coding_exception
      */
     public function restore_user_enrolment(restore_enrolments_structure_step $step, $data, $instance, $userid, $oldinstancestatus) {
         $this->enrol_user($instance, $userid, null, $data->timestart, $data->timeend, $data->status);
@@ -296,10 +304,11 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      * Return an array of valid options for the status.
      *
      * @return array
+     * @throws coding_exception
      */
     protected function get_status_options() {
-        $options = array(ENROL_INSTANCE_ENABLED  => get_string('yes'),
-                         ENROL_INSTANCE_DISABLED => get_string('no'));
+        $options = array(ENROL_INSTANCE_ENABLED => get_string('yes'),
+            ENROL_INSTANCE_DISABLED => get_string('no'));
         return $options;
     }
 
@@ -327,6 +336,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      * @param MoodleQuickForm $mform
      * @param context $context
      * @return bool
+     * @throws coding_exception
      */
     public function edit_instance_form($instance, MoodleQuickForm $mform, $context) {
 
@@ -380,6 +390,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      * @return array of "element_name"=>"error_description" if there are errors,
      *         or an empty array if everything is OK.
      * @return void
+     * @throws coding_exception
      */
     public function edit_instance_validation($data, $files, $instance, $context) {
         $errors = array();
@@ -427,6 +438,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      *
      * @param stdClass $instance
      * @return bool
+     * @throws coding_exception
      */
     public function can_delete_instance($instance) {
         $context = context_course::instance($instance->courseid);
@@ -438,6 +450,7 @@ class enrol_mercadopago_plugin extends enrol_plugin {
      *
      * @param stdClass $instance
      * @return bool
+     * @throws coding_exception
      */
     public function can_hide_show_instance($instance) {
         $context = context_course::instance($instance->courseid);

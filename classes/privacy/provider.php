@@ -22,6 +22,7 @@
  * @author     Hernan Arregoces harregoces@gmail.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace enrol_mercadopago\privacy;
 
 defined('MOODLE_INTERNAL') || die();
@@ -34,49 +35,49 @@ use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 
 class provider implements
-        \core_privacy\local\metadata\provider,
-        \core_privacy\local\request\plugin\provider,
-        \core_privacy\local\request\core_userlist_provider {
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\plugin\provider,
+    \core_privacy\local\request\core_userlist_provider {
 
-    public static function get_metadata(collection $collection) : collection {
+    public static function get_metadata(collection $collection): collection {
         $collection->add_external_location_link(
             'mercadopago.com',
             [
-                'os0'        => 'privacy:metadata:enrol_mercadopago:mercadopago_com:os0',
-                'custom'     => 'privacy:metadata:enrol_mercadopago:mercadopago_com:custom',
+                'os0' => 'privacy:metadata:enrol_mercadopago:mercadopago_com:os0',
+                'custom' => 'privacy:metadata:enrol_mercadopago:mercadopago_com:custom',
                 'first_name' => 'privacy:metadata:enrol_mercadopago:mercadopago_com:first_name',
-                'last_name'  => 'privacy:metadata:enrol_mercadopago:mercadopago_com:last_name',
-                'address'    => 'privacy:metadata:enrol_mercadopago:mercadopago_com:address',
-                'city'       => 'privacy:metadata:enrol_mercadopago:mercadopago_com:city',
-                'email'      => 'privacy:metadata:enrol_mercadopago:mercadopago_com:email',
-                'country'    => 'privacy:metadata:enrol_mercadopago:mercadopago_com:country',
+                'last_name' => 'privacy:metadata:enrol_mercadopago:mercadopago_com:last_name',
+                'address' => 'privacy:metadata:enrol_mercadopago:mercadopago_com:address',
+                'city' => 'privacy:metadata:enrol_mercadopago:mercadopago_com:city',
+                'email' => 'privacy:metadata:enrol_mercadopago:mercadopago_com:email',
+                'country' => 'privacy:metadata:enrol_mercadopago:mercadopago_com:country',
             ],
             'privacy:metadata:enrol_mercadopago:mercadopago_com'
         );
 
         // The enrol_mercadopago has a DB table that contains user data.
         $collection->add_database_table(
-                'enrol_mercadopago',
-                [
-                    'business'            => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:business',
-                    'receiver_email'      => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:receiver_email',
-                    'receiver_id'         => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:receiver_id',
-                    'item_name'           => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:item_name',
-                    'courseid'            => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:courseid',
-                    'userid'              => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:userid',
-                    'instanceid'          => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:instanceid',
-                    'memo'                => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:memo',
-                    'tax'                 => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:tax',
-                    'option_selection1_x' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:option_selection1_x',
-                    'payment_status'      => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:payment_status',
-                    'pending_reason'      => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:pending_reason',
-                    'reason_code'         => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:reason_code',
-                    'txn_id'              => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:txn_id',
-                    'parent_txn_id'       => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:parent_txn_id',
-                    'payment_type'        => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:payment_type',
-                    'timeupdated'         => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:timeupdated'
-                ],
-                'privacy:metadata:enrol_mercadopago:enrol_mercadopago'
+            'enrol_mercadopago',
+            [
+                'business' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:business',
+                'receiver_email' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:receiver_email',
+                'receiver_id' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:receiver_id',
+                'item_name' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:item_name',
+                'courseid' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:courseid',
+                'userid' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:userid',
+                'instanceid' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:instanceid',
+                'memo' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:memo',
+                'tax' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:tax',
+                'option_selection1_x' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:option_selection1_x',
+                'payment_status' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:payment_status',
+                'pending_reason' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:pending_reason',
+                'reason_code' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:reason_code',
+                'txn_id' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:txn_id',
+                'parent_txn_id' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:parent_txn_id',
+                'payment_type' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:payment_type',
+                'timeupdated' => 'privacy:metadata:enrol_mercadopago:enrol_mercadopago:timeupdated'
+            ],
+            'privacy:metadata:enrol_mercadopago:enrol_mercadopago'
         );
 
         return $collection;
@@ -88,7 +89,7 @@ class provider implements
      * @param int $userid The user to search.
      * @return contextlist The contextlist containing the list of contexts used in this plugin.
      */
-    public static function get_contexts_for_userid(int $userid) : contextlist {
+    public static function get_contexts_for_userid(int $userid): contextlist {
         $contextlist = new contextlist();
 
         $sql = "SELECT ctx.id
@@ -99,7 +100,7 @@ class provider implements
                  WHERE u.id = :userid";
         $params = [
             'contextcourse' => CONTEXT_COURSE,
-            'userid'        => $userid,
+            'userid' => $userid,
         ];
 
         $contextlist->add_from_sql($sql, $params);
@@ -110,7 +111,7 @@ class provider implements
     /**
      * Get the list of users who have data within a context.
      *
-     * @param   userlist    $userlist   The userlist containing the list of users who have data in this context/plugin combination.
+     * @param   userlist $userlist The userlist containing the list of users who have data in this context/plugin combination.
      */
     public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
@@ -155,8 +156,8 @@ class provider implements
 
         $params = [
             'contextcourse' => CONTEXT_COURSE,
-            'userid'        => $user->id,
-            'emailuserid'   => $user->id,
+            'userid' => $user->id,
+            'emailuserid' => $user->id,
         ];
         $params += $contextparams;
 
@@ -170,30 +171,30 @@ class provider implements
                 if (!empty($transactions)) {
                     $coursecontext = \context_course::instance($record->courseid);
                     writer::with_context($coursecontext)->export_data(
-                            [$strtransactions],
-                            (object) ['transactions' => $transactions]
+                        [$strtransactions],
+                        (object)['transactions' => $transactions]
                     );
                 }
                 $transactions = [];
             }
 
-            $transaction = (object) [
-                'receiver_id'         => $record->receiver_id,
-                'item_name'           => $record->item_name,
-                'userid'              => $record->userid,
-                'memo'                => $record->memo,
-                'tax'                 => $record->tax,
-                'option_name1'        => $record->option_name1,
+            $transaction = (object)[
+                'receiver_id' => $record->receiver_id,
+                'item_name' => $record->item_name,
+                'userid' => $record->userid,
+                'memo' => $record->memo,
+                'tax' => $record->tax,
+                'option_name1' => $record->option_name1,
                 'option_selection1_x' => $record->option_selection1_x,
-                'option_name2'        => $record->option_name2,
+                'option_name2' => $record->option_name2,
                 'option_selection2_x' => $record->option_selection2_x,
-                'payment_status'      => $record->payment_status,
-                'pending_reason'      => $record->pending_reason,
-                'reason_code'         => $record->reason_code,
-                'txn_id'              => $record->txn_id,
-                'parent_txn_id'       => $record->parent_txn_id,
-                'payment_type'        => $record->payment_type,
-                'timeupdated'         => \core_privacy\local\request\transform::datetime($record->timeupdated),
+                'payment_status' => $record->payment_status,
+                'pending_reason' => $record->pending_reason,
+                'reason_code' => $record->reason_code,
+                'txn_id' => $record->txn_id,
+                'parent_txn_id' => $record->parent_txn_id,
+                'payment_type' => $record->payment_type,
+                'timeupdated' => \core_privacy\local\request\transform::datetime($record->timeupdated),
             ];
             if ($record->userid == $user->id) {
                 $transaction->userid = $record->userid;
@@ -215,8 +216,8 @@ class provider implements
         if (!empty($transactions)) {
             $coursecontext = \context_course::instance($record->courseid);
             writer::with_context($coursecontext)->export_data(
-                    [$strtransactions],
-                    (object) ['transactions' => $transactions]
+                [$strtransactions],
+                (object)['transactions' => $transactions]
             );
         }
     }
@@ -279,7 +280,7 @@ class provider implements
     /**
      * Delete multiple users within a single context.
      *
-     * @param   approved_userlist       $userlist The approved context and user information to delete information for.
+     * @param   approved_userlist $userlist The approved context and user information to delete information for.
      */
     public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;

@@ -18,8 +18,7 @@
  * MercadoPago enrolment plugin
  *
  * @package    enrol_mercadopago
- * @copyright  2020 Hernan Arregoces
- * @author     Hernan Arregoces harregoces@gmail.com
+ * @copyright  2021 Eduardo Kraus
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

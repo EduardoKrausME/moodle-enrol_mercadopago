@@ -54,8 +54,7 @@ $capabilities = array(
     'enrol/mercadopago:unenrolself' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-        )
+        'archetypes' => array()
     ),
 
 );

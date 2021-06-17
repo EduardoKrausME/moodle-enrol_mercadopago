@@ -39,14 +39,14 @@ set_exception_handler(\enrol_mercadopago\util::get_exception_handler());
 
 // Make sure we are enabled in the first place.
 if (!enrol_is_enabled('mercadopago')) {
-	http_response_code(503);
-	throw new moodle_exception('errdisabled', 'enrol_mercadopago');
+    http_response_code(503);
+    throw new moodle_exception('errdisabled', 'enrol_mercadopago');
 }
 
 /// Keep out casual intruders
 if (!empty($_POST) or empty($_GET)) {
-	http_response_code(400);
-	throw new moodle_exception('invalidrequest', 'core_error');
+    http_response_code(400);
+    throw new moodle_exception('invalidrequest', 'core_error');
 }
 
 $data = new stdClass();
@@ -70,15 +70,21 @@ $payment = MercadoPago\Payment::find_by_id($data->collection_id);
 
 $external_reference = $payment->external_reference;
 $data->external_reference = $external_reference;
-$external_reference = explode("-",$external_reference);
+$external_reference = explode("-", $external_reference);
 
 $courseid = $external_reference[0];
 $userid = $external_reference[1];
 $instanceid = $external_reference[2];
 
-if($data->userid != $userid) die("Data do not match");
-if($data->courseid != $courseid) die("Data do not match");
-if($data->instanceid != $instanceid) die("Data do not match");
+if ($data->userid != $userid) {
+    die("Data do not match");
+}
+if ($data->courseid != $courseid) {
+    die("Data do not match");
+}
+if ($data->instanceid != $instanceid) {
+    die("Data do not match");
+}
 
 
 $data->payment_id = $payment->id;
@@ -99,164 +105,164 @@ $data->payment_status = $payment->status;
 
 if ($payment->transaction_details->total_paid_amount >= $payment->transaction_amount) {
 
-	if ($data->payment_status != "approved") {
-		$plugin->unenrol_user($plugin_instance, $data->userid);
-		\enrol_mercadopago\util::message_mercadopago_error_to_admin("Status not completed or pending. User unenrolled from course",
-			$data);
-		die;
-	}
+    if ($data->payment_status != "approved") {
+        $plugin->unenrol_user($plugin_instance, $data->userid);
+        \enrol_mercadopago\util::message_mercadopago_error_to_admin("Status not completed or pending. User unenrolled from course",
+            $data);
+        die();
+    }
 
-	// If currency is incorrectly set then someone maybe trying to cheat the system
-	if ($data->currency != $plugin_instance->currency) {
-		\enrol_mercadopago\util::message_mercadopago_error_to_admin(
-			"Currency does not match course settings, received: " . $data->currency,
-			$data);
-		die;
-	}
+    // If currency is incorrectly set then someone maybe trying to cheat the system
+    if ($data->currency != $plugin_instance->currency) {
+        \enrol_mercadopago\util::message_mercadopago_error_to_admin(
+            "Currency does not match course settings, received: " . $data->currency,
+            $data);
+        die();
+    }
 
-	if ($payment->status == "opened") {
-		$eventdata = new \core\message\message();
-		$eventdata->courseid = empty($data->courseid) ? SITEID : $data->courseid;
-		$eventdata->modulename = 'moodle';
-		$eventdata->component = 'enrol_mercadopago';
-		$eventdata->name = 'mercadopago_enrolment';
-		$eventdata->userfrom = get_admin();
-		$eventdata->userto = $user;
-		$eventdata->subject = "Moodle: MercadoPago payment";
-		$eventdata->fullmessage = "Your MercadoPago payment is pending.";
-		$eventdata->fullmessageformat = FORMAT_PLAIN;
-		$eventdata->fullmessagehtml = '';
-		$eventdata->smallmessage = '';
-		message_send($eventdata);
+    if ($payment->status == "opened") {
+        $eventdata = new \core\message\message();
+        $eventdata->courseid = empty($data->courseid) ? SITEID : $data->courseid;
+        $eventdata->modulename = 'moodle';
+        $eventdata->component = 'enrol_mercadopago';
+        $eventdata->name = 'mercadopago_enrolment';
+        $eventdata->userfrom = get_admin();
+        $eventdata->userto = $user;
+        $eventdata->subject = "Moodle: MercadoPago payment";
+        $eventdata->fullmessage = "Your MercadoPago payment is pending.";
+        $eventdata->fullmessageformat = FORMAT_PLAIN;
+        $eventdata->fullmessagehtml = '';
+        $eventdata->smallmessage = '';
+        message_send($eventdata);
 
-		\enrol_mercadopago\util::message_mercadopago_error_to_admin("Payment pending", $data);
-		die;
-	}
+        \enrol_mercadopago\util::message_mercadopago_error_to_admin("Payment pending", $data);
+        die();
+    }
 
-	// Make sure this transaction doesn't exist already.
-	if ($existing = $DB->get_record("enrol_mercadopago", array("collection_id" => $data->collection_id), "*", IGNORE_MULTIPLE)) {
-		\enrol_mercadopago\util::message_mercadopago_error_to_admin("Transaction $data->collection_id is being repeated!", $data);
-		die;
-	}
+    // Make sure this transaction doesn't exist already.
+    if ($existing = $DB->get_record("enrol_mercadopago", array("collection_id" => $data->collection_id), "*", IGNORE_MULTIPLE)) {
+        \enrol_mercadopago\util::message_mercadopago_error_to_admin("Transaction $data->collection_id is being repeated!", $data);
+        die();
+    }
 
-	if (!$user = $DB->get_record('user', array('id' => $data->userid))) {   // Check that user exists
-		\enrol_mercadopago\util::message_mercadopago_error_to_admin("User $data->userid doesn't exist", $data);
-		die;
-	}
+    if (!$user = $DB->get_record('user', array('id' => $data->userid))) {   // Check that user exists
+        \enrol_mercadopago\util::message_mercadopago_error_to_admin("User $data->userid doesn't exist", $data);
+        die();
+    }
 
-	if (!$course = $DB->get_record('course', array('id' => $data->courseid))) { // Check that course exists
-		\enrol_mercadopago\util::message_mercadopago_error_to_admin("Course $data->courseid doesn't exist", $data);
-		die;
-	}
+    if (!$course = $DB->get_record('course', array('id' => $data->courseid))) { // Check that course exists
+        \enrol_mercadopago\util::message_mercadopago_error_to_admin("Course $data->courseid doesn't exist", $data);
+        die();
+    }
 
-	$coursecontext = context_course::instance($course->id, IGNORE_MISSING);
+    $coursecontext = context_course::instance($course->id, IGNORE_MISSING);
 
-	// Check that amount paid is the correct amount
-	if ((float)$plugin_instance->cost <= 0) {
-		$cost = (float)$plugin->get_config('cost');
-	} else {
-		$cost = (float)$plugin_instance->cost;
-	}
+    // Check that amount paid is the correct amount
+    if ((float)$plugin_instance->cost <= 0) {
+        $cost = (float)$plugin->get_config('cost');
+    } else {
+        $cost = (float)$plugin_instance->cost;
+    }
 
-	// Use the same rounding of floats as on the enrol form.
-	$cost = format_float($cost, 2, false);
+    // Use the same rounding of floats as on the enrol form.
+    $cost = format_float($cost, 2, false);
 
-	if ($data->transaction_amount < $cost) {
-		\enrol_mercadopago\util::message_mercadopago_error_to_admin("Amount paid is not enough ($data->transaction_amount < $cost))", $data);
-		die;
-	}
+    if ($data->transaction_amount < $cost) {
+        \enrol_mercadopago\util::message_mercadopago_error_to_admin("Amount paid is not enough ($data->transaction_amount < $cost))", $data);
+        die();
+    }
 
-	// ALL CLEAR !
-	$DB->insert_record("enrol_mercadopago", $data);
+    // ALL CLEAR !
+    $DB->insert_record("enrol_mercadopago", $data);
 
-	if ($plugin_instance->enrolperiod) {
-		$timestart = time();
-		$timeend = $timestart + $plugin_instance->enrolperiod;
-	} else {
-		$timestart = 0;
-		$timeend = 0;
-	}
+    if ($plugin_instance->enrolperiod) {
+        $timestart = time();
+        $timeend = $timestart + $plugin_instance->enrolperiod;
+    } else {
+        $timestart = 0;
+        $timeend = 0;
+    }
 
-	// Enrol user
-	$plugin->enrol_user($plugin_instance, $user->id, $plugin_instance->roleid, $timestart, $timeend);
+    // Enrol user
+    $plugin->enrol_user($plugin_instance, $user->id, $plugin_instance->roleid, $timestart, $timeend);
 
-	// Pass $view=true to filter hidden caps if the user cannot see them
-	if ($users = get_users_by_capability($context, 'moodle/course:update', 'u.*', 'u.id ASC',
-		'', '', '', '', false, true)) {
-		$users = sort_by_roleassignment_authority($users, $context);
-		$teacher = array_shift($users);
-	} else {
-		$teacher = false;
-	}
+    // Pass $view=true to filter hidden caps if the user cannot see them
+    if ($users = get_users_by_capability($context, 'moodle/course:update', 'u.*', 'u.id ASC',
+        '', '', '', '', false, true)) {
+        $users = sort_by_roleassignment_authority($users, $context);
+        $teacher = array_shift($users);
+    } else {
+        $teacher = false;
+    }
 
-	$mailstudents = $plugin->get_config('mailstudents');
-	$mailteachers = $plugin->get_config('mailteachers');
-	$mailadmins = $plugin->get_config('mailadmins');
-	$shortname = format_string($course->shortname, true, array('context' => $context));
+    $mailstudents = $plugin->get_config('mailstudents');
+    $mailteachers = $plugin->get_config('mailteachers');
+    $mailadmins = $plugin->get_config('mailadmins');
+    $shortname = format_string($course->shortname, true, array('context' => $context));
 
 
-	if (!empty($mailstudents)) {
-		$a = new stdClass();
-		$a->coursename = format_string($course->fullname, true, array('context' => $coursecontext));
-		$a->profileurl = "$CFG->wwwroot/user/view.php?id=$user->id";
+    if (!empty($mailstudents)) {
+        $a = new stdClass();
+        $a->coursename = format_string($course->fullname, true, array('context' => $coursecontext));
+        $a->profileurl = "$CFG->wwwroot/user/view.php?id=$user->id";
 
-		$eventdata = new \core\message\message();
-		$eventdata->courseid = $course->id;
-		$eventdata->modulename = 'moodle';
-		$eventdata->component = 'enrol_mercadopago';
-		$eventdata->name = 'mercadopago_enrolment';
-		$eventdata->userfrom = empty($teacher) ? core_user::get_noreply_user() : $teacher;
-		$eventdata->userto = $user;
-		$eventdata->subject = get_string("enrolmentnew", 'enrol', $shortname);
-		$eventdata->fullmessage = get_string('welcometocoursetext', '', $a);
-		$eventdata->fullmessageformat = FORMAT_PLAIN;
-		$eventdata->fullmessagehtml = '';
-		$eventdata->smallmessage = '';
-		message_send($eventdata);
+        $eventdata = new \core\message\message();
+        $eventdata->courseid = $course->id;
+        $eventdata->modulename = 'moodle';
+        $eventdata->component = 'enrol_mercadopago';
+        $eventdata->name = 'mercadopago_enrolment';
+        $eventdata->userfrom = empty($teacher) ? core_user::get_noreply_user() : $teacher;
+        $eventdata->userto = $user;
+        $eventdata->subject = get_string("enrolmentnew", 'enrol', $shortname);
+        $eventdata->fullmessage = get_string('welcometocoursetext', '', $a);
+        $eventdata->fullmessageformat = FORMAT_PLAIN;
+        $eventdata->fullmessagehtml = '';
+        $eventdata->smallmessage = '';
+        message_send($eventdata);
 
-	}
+    }
 
-	if (!empty($mailteachers) && !empty($teacher)) {
-		$a->course = format_string($course->fullname, true, array('context' => $coursecontext));
-		$a->user = fullname($user);
+    if (!empty($mailteachers) && !empty($teacher)) {
+        $a->course = format_string($course->fullname, true, array('context' => $coursecontext));
+        $a->user = fullname($user);
 
-		$eventdata = new \core\message\message();
-		$eventdata->courseid = $course->id;
-		$eventdata->modulename = 'moodle';
-		$eventdata->component = 'enrol_mercadopago';
-		$eventdata->name = 'mercadopago_enrolment';
-		$eventdata->userfrom = $user;
-		$eventdata->userto = $teacher;
-		$eventdata->subject = get_string("enrolmentnew", 'enrol', $shortname);
-		$eventdata->fullmessage = get_string('enrolmentnewuser', 'enrol', $a);
-		$eventdata->fullmessageformat = FORMAT_PLAIN;
-		$eventdata->fullmessagehtml = '';
-		$eventdata->smallmessage = '';
-		message_send($eventdata);
-	}
+        $eventdata = new \core\message\message();
+        $eventdata->courseid = $course->id;
+        $eventdata->modulename = 'moodle';
+        $eventdata->component = 'enrol_mercadopago';
+        $eventdata->name = 'mercadopago_enrolment';
+        $eventdata->userfrom = $user;
+        $eventdata->userto = $teacher;
+        $eventdata->subject = get_string("enrolmentnew", 'enrol', $shortname);
+        $eventdata->fullmessage = get_string('enrolmentnewuser', 'enrol', $a);
+        $eventdata->fullmessageformat = FORMAT_PLAIN;
+        $eventdata->fullmessagehtml = '';
+        $eventdata->smallmessage = '';
+        message_send($eventdata);
+    }
 
-	if (!empty($mailadmins)) {
-		$a->course = format_string($course->fullname, true, array('context' => $coursecontext));
-		$a->user = fullname($user);
-		$admins = get_admins();
-		foreach ($admins as $admin) {
-			$eventdata = new \core\message\message();
-			$eventdata->courseid = $course->id;
-			$eventdata->modulename = 'moodle';
-			$eventdata->component = 'enrol_mercadopago';
-			$eventdata->name = 'mercadopago_enrolment';
-			$eventdata->userfrom = $user;
-			$eventdata->userto = $admin;
-			$eventdata->subject = get_string("enrolmentnew", 'enrol', $shortname);
-			$eventdata->fullmessage = get_string('enrolmentnewuser', 'enrol', $a);
-			$eventdata->fullmessageformat = FORMAT_PLAIN;
-			$eventdata->fullmessagehtml = '';
-			$eventdata->smallmessage = '';
-			message_send($eventdata);
-		}
-	}
+    if (!empty($mailadmins)) {
+        $a->course = format_string($course->fullname, true, array('context' => $coursecontext));
+        $a->user = fullname($user);
+        $admins = get_admins();
+        foreach ($admins as $admin) {
+            $eventdata = new \core\message\message();
+            $eventdata->courseid = $course->id;
+            $eventdata->modulename = 'moodle';
+            $eventdata->component = 'enrol_mercadopago';
+            $eventdata->name = 'mercadopago_enrolment';
+            $eventdata->userfrom = $user;
+            $eventdata->userto = $admin;
+            $eventdata->subject = get_string("enrolmentnew", 'enrol', $shortname);
+            $eventdata->fullmessage = get_string('enrolmentnewuser', 'enrol', $a);
+            $eventdata->fullmessageformat = FORMAT_PLAIN;
+            $eventdata->fullmessagehtml = '';
+            $eventdata->smallmessage = '';
+            message_send($eventdata);
+        }
+    }
 
-	//Clear cache and redirect
-	redirect(new moodle_url('/course/view.php', array('id'=>$course->id)));
+    //Clear cache and redirect
+    redirect(new moodle_url('/course/view.php', array('id' => $course->id)));
 
 }

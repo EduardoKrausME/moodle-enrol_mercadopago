@@ -43,9 +43,9 @@ if ($ADMIN->fulltree) {
     // Note: let's reuse the ext sync constants and strings here, internally it is very similar,
     //       it describes what should happen when users are not supposed to be enrolled any more.
     $options = array(
-        ENROL_EXT_REMOVED_KEEP           => get_string('extremovedkeep', 'enrol'),
+        ENROL_EXT_REMOVED_KEEP => get_string('extremovedkeep', 'enrol'),
         ENROL_EXT_REMOVED_SUSPENDNOROLES => get_string('extremovedsuspendnoroles', 'enrol'),
-        ENROL_EXT_REMOVED_UNENROL        => get_string('extremovedunenrol', 'enrol'),
+        ENROL_EXT_REMOVED_UNENROL => get_string('extremovedunenrol', 'enrol'),
     );
     $settings->add(new admin_setting_configselect('enrol_mercadopago/expiredaction', get_string('expiredaction', 'enrol_mercadopago'), get_string('expiredaction_help', 'enrol_mercadopago'), ENROL_EXT_REMOVED_SUSPENDNOROLES, $options));
 
@@ -53,8 +53,8 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('enrol_mercadopago_defaults',
         get_string('enrolinstancedefaults', 'admin'), get_string('enrolinstancedefaults_desc', 'admin')));
 
-    $options = array(ENROL_INSTANCE_ENABLED  => get_string('yes'),
-                     ENROL_INSTANCE_DISABLED => get_string('no'));
+    $options = array(ENROL_INSTANCE_ENABLED => get_string('yes'),
+        ENROL_INSTANCE_DISABLED => get_string('no'));
     $settings->add(new admin_setting_configselect('enrol_mercadopago/status',
         get_string('status', 'enrol_mercadopago'), get_string('status_desc', 'enrol_mercadopago'), ENROL_INSTANCE_DISABLED, $options));
 

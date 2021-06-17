@@ -25,9 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2021042701;
-$plugin->requires  = 2019111200;
+$plugin->version = 2021042701;
+$plugin->requires = 2019111200;
+$plugin->release = 'v1';
 $plugin->component = 'enrol_mercadopago';
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = 'v1';
-$plugin->dependencies = [];

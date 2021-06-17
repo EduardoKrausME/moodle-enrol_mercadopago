@@ -39,16 +39,16 @@ set_exception_handler(\enrol_mercadopago\util::get_exception_handler());
 
 // Make sure we are enabled in the first place.
 if (!enrol_is_enabled('mercadopago')) {
-	http_response_code(503);
-	throw new moodle_exception('errdisabled', 'enrol_mercadopago');
+    http_response_code(503);
+    throw new moodle_exception('errdisabled', 'enrol_mercadopago');
 }
 
 /// Keep out casual intruders
 $back_url = required_param('back_url', PARAM_ALPHAEXT);
 $payment_id = required_param('payment_id', PARAM_INT);
 if (empty($_POST) or !empty($_GET)) {
-	http_response_code(400);
-	throw new moodle_exception('invalidrequest', 'core_error');
+    http_response_code(400);
+    throw new moodle_exception('invalidrequest', 'core_error');
 }
 
 

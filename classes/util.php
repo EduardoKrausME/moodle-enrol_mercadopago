@@ -22,6 +22,7 @@
  * @author     Hernan Arregoces harregoces@gmail.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace enrol_mercadopago;
 
 defined('MOODLE_INTERNAL') || die();
@@ -39,17 +40,17 @@ final class util {
         }
 
         $eventdata = new \core\message\message();
-        $eventdata->courseid          = empty($data->courseid) ? SITEID : $data->courseid;
-        $eventdata->modulename        = 'moodle';
-        $eventdata->component         = 'enrol_mercadopago';
-        $eventdata->name              = 'mercadopago_enrolment';
-        $eventdata->userfrom          = $admin;
-        $eventdata->userto            = $admin;
-        $eventdata->subject           = "MERCADOPAGO ERROR: ".$subject;
-        $eventdata->fullmessage       = $message;
+        $eventdata->courseid = empty($data->courseid) ? SITEID : $data->courseid;
+        $eventdata->modulename = 'moodle';
+        $eventdata->component = 'enrol_mercadopago';
+        $eventdata->name = 'mercadopago_enrolment';
+        $eventdata->userfrom = $admin;
+        $eventdata->userto = $admin;
+        $eventdata->subject = "MERCADOPAGO ERROR: " . $subject;
+        $eventdata->fullmessage = $message;
         $eventdata->fullmessageformat = FORMAT_PLAIN;
-        $eventdata->fullmessagehtml   = '';
-        $eventdata->smallmessage      = '';
+        $eventdata->fullmessagehtml = '';
+        $eventdata->smallmessage = '';
         message_send($eventdata);
     }
 
@@ -59,12 +60,12 @@ final class util {
      * @return callable exception handler
      */
     public static function get_exception_handler() {
-        return function($ex) {
+        return function ($ex) {
             $info = get_exception_info($ex);
 
-            $logerrmsg = "enrol_mercadopago IPN exception handler: ".$info->message;
+            $logerrmsg = "enrol_mercadopago IPN exception handler: " . $info->message;
             if (debugging('', DEBUG_NORMAL)) {
-                $logerrmsg .= ' Debug: '.$info->debuginfo."\n".format_backtrace($info->backtrace, true);
+                $logerrmsg .= ' Debug: ' . $info->debuginfo . "\n" . format_backtrace($info->backtrace, true);
             }
             error_log($logerrmsg);
 
